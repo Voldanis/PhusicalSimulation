@@ -20,7 +20,8 @@ from PyQt5.QtWidgets import (
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.side_size = 600
+        self.width = 600
+        self.height = 480
         self.measurements = {"None": Measurement(0, 0, 0)}
         self.main_measurement = self.measurements["None"]
         self.values = 11
@@ -65,7 +66,7 @@ class Window(QMainWindow):
         self.show()
 
     def draw_d(self, main_m):
-        canvas = QPixmap(self.side_size, self.side_size)
+        canvas = QPixmap(self.width, self.height)
         canvas.fill(QColor('white'))
         painter = QPainter(canvas)
 
