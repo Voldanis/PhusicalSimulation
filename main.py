@@ -3,20 +3,18 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QComboBox, QHBox
                              QStackedLayout, QWidget,
                              QLineEdit, QPushButton)
 from PyQt6.QtGui import QPixmap, QColor, QPainter, QPen, QFont
-
+import time
 
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.side_size = 600
-        self.measurements = {"None": Measurement(2, 0, 0)}
+        self.measurements = {"None": Measurement(0, 0, 0)}
         self.main_measurement = self.measurements["None"]
-        self.main_measurement.objects.append(Object(1, 1))
         self.values = 11
-        '''self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.timerr)
-        self.timer.start(1000)'''
-
+        self.fps = 10
+        self.timer = QtCore.QTimer()
+        #self.start_timer()
 
         layout = QGridLayout()
         # {
@@ -92,12 +90,19 @@ class Window(QMainWindow):
                 if main_m.x * main_m.scale <= i.x <= (main_m.x + self.values - 1) * main_m.scale \
                         and main_m.y * main_m.scale <= i.y <= (main_m.y + self.values - 1) * main_m.scale:
                     painter.drawEllipse(self.calculate_x(i.x, division) + 30, self.calculate_y(i.y, division), 10, 10)
-                    #print(self.calculate_x(i.x, main_m.x, division), )
         painter.end()
         self.label.setPixmap(canvas)
 
-    def timerr(self):
-        print(1)
+    def start_timer(self):
+        self.timer.timeout.connect(self.iteration)
+        self.main_measurement.t = time.time()
+        self.timer.start(int(1000 / self.fps))
+
+    def iteration(self):
+        t = time.time() - self.main_measurement.t
+        for i in self.main_measurement.objects:
+            i.time_sync(t)
+        self.draw_d(self.main_measurement)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_A:
@@ -110,16 +115,8 @@ class Window(QMainWindow):
             self.main_measurement.y += 1
         if event.key() == QtCore.Qt.Key.Key_Plus:
             self.main_measurement.scale *= 0.5
-            self.main_measurement.x += 5 * self.main_measurement.scale
         if event.key() == QtCore.Qt.Key.Key_Minus:
-            '''self.main_measurement.x *= self.main_measurement.scale
-            self.main_measurement -= 5 * self.main_measurement.scale
-            self.main_measurement.x /= self.main_measurement.scale
-            print(1)'''
             self.main_measurement.scale *= 2
-
-
-
         self.draw_d(self.main_measurement)
 
     def calculate_x(self, xo, division):
@@ -134,14 +131,40 @@ class Measurement():
         self.d = d
         self.x = x
         self.y = y
-        self.scale = 4
+        self.scale = 1
         self.objects = []
+        self.t = 0
 
 
 class Object():
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, x0, y0, v0, a0):
+        self.x0 = x0
+        self.y0 = y0
+        self.v0 = Vector(v0)
+        self.a0 = Vector(a0)
+        self.v = self.v0.copy()
+        self.x = self.x0
+        self.y = self.y0
+
+    def time_sync(self, t):
+        self.x = self.x0 + self.v0.x * t + self.a0.x * t * t * 0.5
+        self.y = self.y0 + self.v0.y * t + self.a0.y * t * t * 0.5
+        self.v = self.v0 + self.a0 * t
+
+
+class Vector():
+    def __init__(self, vector):
+        self.x = vector[0]
+        self.y = vector[1]
+
+    def copy(self):
+        return Vector([self.x, self.y])
+
+    def __add__(self, other):
+        return Vector([self.x + other.x, self.y + other.y])
+
+    def __mul__(self, other):
+        return Vector([self.x * other, self.y * other])
 
 
 if __name__ == '__main__':
