@@ -9,9 +9,14 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.side_size = 600
-        self.measurements = {"None": Measurement(0, 0, 0, 1)}
+        self.measurements = {"None": Measurement(2, 0, 0)}
         self.main_measurement = self.measurements["None"]
+        self.main_measurement.objects.append(Object(1, 1))
         self.values = 11
+        '''self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.timerr)
+        self.timer.start(1000)'''
+
 
         layout = QGridLayout()
         # {
@@ -71,20 +76,28 @@ class Window(QMainWindow):
             for i in range(self.values):
                 painter.drawLine(i * division, self.side_size // 2, i * division, self.side_size // 2 + 10)
                 painter.drawText(i * division - 3, self.side_size // 2 + 22, str((main_m.x + i) * main_m.scale))
+            for i in main_m.objects:
+                if main_m.x * main_m.scale <= i.x <= (main_m.x + self.values - 1) * main_m.scale:
+                    painter.drawEllipse(self.calculate_x(i.x, division), self.side_size // 2 - 5, 10, 10)
         elif main_m.d == 2:
-            division = self.values - 1
-            divisionx = (self.side_size - 30) // division
-            divisiony = (self.side_size - 30) // division
+            division = (self.side_size - 30) // (self.values - 1)
             painter.drawLine(30, 0, 30, self.side_size - 30)
             painter.drawLine(30, self.side_size - 30, self.side_size, self.side_size - 30)
             for i in range(self.values):
-                painter.drawLine(20, i * divisiony, self.side_size, i * divisiony)
-                painter.drawText(0, self.side_size - 27 - i * divisiony, str((main_m.y + i) * main_m.scale))
-                painter.drawLine(30 + i * divisionx, self.side_size - 30, 30 + i * divisionx, 0)
-                painter.drawText(i * divisionx + 24, self.side_size - 8, str((main_m.x + i) * main_m.scale))
-
+                painter.drawLine(20, i * division, self.side_size, i * division)
+                painter.drawText(0, self.side_size - 27 - i * division, str((main_m.y + i) * main_m.scale))
+                painter.drawLine(30 + i * division, self.side_size - 30, 30 + i * division, 0)
+                painter.drawText(i * division + 24, self.side_size - 8, str((main_m.x + i) * main_m.scale))
+            for i in main_m.objects:
+                if main_m.x * main_m.scale <= i.x <= (main_m.x + self.values - 1) * main_m.scale \
+                        and main_m.y * main_m.scale <= i.y <= (main_m.y + self.values - 1) * main_m.scale:
+                    painter.drawEllipse(self.calculate_x(i.x, division) + 30, self.calculate_y(i.y, division), 10, 10)
+                    #print(self.calculate_x(i.x, main_m.x, division), )
         painter.end()
         self.label.setPixmap(canvas)
+
+    def timerr(self):
+        print(1)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_A:
@@ -96,18 +109,39 @@ class Window(QMainWindow):
         if event.key() == QtCore.Qt.Key.Key_W:
             self.main_measurement.y += 1
         if event.key() == QtCore.Qt.Key.Key_Plus:
-            self.main_measurement.scale *= 2
-        if event.key() == QtCore.Qt.Key.Key_Minus:
             self.main_measurement.scale *= 0.5
+            self.main_measurement.x += 5 * self.main_measurement.scale
+        if event.key() == QtCore.Qt.Key.Key_Minus:
+            '''self.main_measurement.x *= self.main_measurement.scale
+            self.main_measurement -= 5 * self.main_measurement.scale
+            self.main_measurement.x /= self.main_measurement.scale
+            print(1)'''
+            self.main_measurement.scale *= 2
+
+
+
         self.draw_d(self.main_measurement)
+
+    def calculate_x(self, xo, division):
+        return round((xo / self.main_measurement.scale - self.main_measurement.x) * division) - 5
+
+    def calculate_y(self, yo, division):
+        return self.side_size - round((yo / self.main_measurement.scale - self.main_measurement.y) * division) - 30 - 5
 
 
 class Measurement():
-    def __init__(self, d, x, y, scale):
+    def __init__(self, d, x, y):
         self.d = d
         self.x = x
         self.y = y
-        self.scale = scale
+        self.scale = 4
+        self.objects = []
+
+
+class Object():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 
 if __name__ == '__main__':
