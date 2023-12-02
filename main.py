@@ -1,9 +1,21 @@
-from PyQt6 import QtCore
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,
-                             QStackedLayout, QWidget,
-                             QLineEdit, QPushButton)
-from PyQt6.QtGui import QPixmap, QColor, QPainter, QPen, QFont
 import time
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import QColor, QFont, QPainter, QPen, QPixmap
+from PyQt5.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QStackedLayout,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class Window(QMainWindow):
     def __init__(self):
