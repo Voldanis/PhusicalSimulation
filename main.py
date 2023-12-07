@@ -125,16 +125,17 @@ class MainWindow(QWidget):
 
     def keyPressEvent(self, event: QKeyEvent):
         measure = +self.cur_measurement
+        step = ceil(1/measure.scale)
 
         match event.key():
             case QtCore.Qt.Key.Key_A:
-                measure.cam_x -= measure.scale
+                measure.cam_x -= step
             case QtCore.Qt.Key.Key_D:
-                measure.cam_x += measure.scale
+                measure.cam_x += step
             case QtCore.Qt.Key.Key_S:
-                measure.cam_y -= measure.scale
+                measure.cam_y -= step
             case QtCore.Qt.Key.Key_W:
-                measure.cam_y += measure.scale
+                measure.cam_y += step
             case QtCore.Qt.Key.Key_Equal:
                 measure.scale *= 1.1
             case QtCore.Qt.Key.Key_Minus:
