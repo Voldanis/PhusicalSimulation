@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
 
 from classes import Measurement
 from settings import MeasurementsSettings, ToggleSettings
+from utils import Pointer
 
 
 class MainWindow(QWidget):
@@ -22,7 +23,7 @@ class MainWindow(QWidget):
         self.canvas_width = 600
         self.canvas_height = 480
         self.measurements = {"1D": Measurement(1, 0, 0), "2D": Measurement(2, 0, 0)}
-        self.cur_measurement = self.measurements["1D"]
+        self.cur_measurement = Pointer(self.measurements["1D"])
         self.values = 11
         self.fps = 10
 
@@ -46,13 +47,16 @@ class MainWindow(QWidget):
         settings = QVBoxLayout(settings_widget)
         settings.setContentsMargins(8, 8, 8, 8)
 
-        measures_settings = MeasurementsSettings(self.measurements, self.draw_measurement)
+        measures_settings = MeasurementsSettings(
+            self.measurements, self.cur_measurement,
+            self.draw_measurement
+        )
         toggle_widget = ToggleSettings(measures_settings, None)
 
         settings.addWidget(toggle_widget)
         settings.addWidget(measures_settings)
 
-        self.draw_measurement(self.cur_measurement)
+        self.draw_measurement(+self.cur_measurement)
 
         self.setFocus()
         self.show()
@@ -110,31 +114,35 @@ class MainWindow(QWidget):
 
     def start_timer(self):
         self.timer.timeout.connect(self.iteration)
-        self.cur_measurement.time = time.time()
+        (+self.cur_measurement).time = time.time()
         self.timer.start(int(1000 / self.fps))
 
     def iteration(self):
-        t = time.time() - self.cur_measurement.time
-        for i in self.cur_measurement.objects:
+        t = time.time() - (+self.cur_measurement).time
+        for i in (+self.cur_measurement).objects:
             i.simulate(t)
-        self.draw_measurement(self.cur_measurement)
+        self.draw_measurement(+self.cur_measurement)
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == QtCore.Qt.Key.Key_A:
-            self.cur_measurement.cam_x -= 1
-        elif event.key() == QtCore.Qt.Key.Key_D:
-            self.cur_measurement.cam_x += 1
-        elif event.key() == QtCore.Qt.Key.Key_S:
-            self.cur_measurement.cam_y -= 1
-        elif event.key() == QtCore.Qt.Key.Key_W:
-            self.cur_measurement.cam_y += 1
-        elif event.key() == QtCore.Qt.Key.Key_Equal:
-            self.cur_measurement.scale *= 1.1
-        elif event.key() == QtCore.Qt.Key.Key_Minus:
-            self.cur_measurement.scale /= 1.1
-        elif event.key() == QtCore.Qt.Key.Key_Escape:
-            self.setFocus()
-        self.draw_measurement(self.cur_measurement)
+        measure = +self.cur_measurement
+
+        match event.key():
+            case QtCore.Qt.Key.Key_A:
+                measure.cam_x -= measure.scale
+            case QtCore.Qt.Key.Key_D:
+                measure.cam_x += measure.scale
+            case QtCore.Qt.Key.Key_S:
+                measure.cam_y -= measure.scale
+            case QtCore.Qt.Key.Key_W:
+                measure.cam_y += measure.scale
+            case QtCore.Qt.Key.Key_Equal:
+                measure.scale *= 1.1
+            case QtCore.Qt.Key.Key_Minus:
+                measure.scale /= 1.1
+            case QtCore.Qt.Key.Key_Escape:
+                self.setFocus()
+
+        self.draw_measurement(+self.cur_measurement)
 
 
 if __name__ == '__main__':

@@ -12,14 +12,17 @@ from PyQt5.QtWidgets import (
 )
 
 from classes import Measurement
+from utils import Pointer
 
 
 class MeasurementsSettings(QWidget):
     def __init__(self, measurements: dict[str, Measurement],
+                 cur_measurement: Pointer,
                  draw_measurement: Callable[[Measurement], None]) -> None:
         super().__init__()
 
         self.measurements = measurements
+        self.cur_measurement = cur_measurement
         self.draw_measurement = draw_measurement
 
         self.init_ui()
@@ -80,7 +83,7 @@ class MeasurementsSettings(QWidget):
         measurement = self.measurements.get(text)
         if measurement is None:
             return
-        self.cur_measurement = measurement
+        self.cur_measurement << measurement
         self.draw_measurement(measurement)
     
     def measurement_create(self):
@@ -132,15 +135,18 @@ class MeasurementsSettings(QWidget):
 
     def delete_measure(self):
         for k, v in self.measurements.items():
-            if v is self.cur_measurement:
+            if v is +self.cur_measurement:
                 self.measurements.pop(k)
                 for i in range(self.measure_box.count()):
                     if self.measure_box.itemText(i) == k:
                         self.measure_box.removeItem(i)
                 break
 
-        name, self.cur_measurement = next(iter(self.measurements.items()))
-        self.draw_measurement(self.cur_measurement)
+        item = next(iter(self.measurements.items()))
+        name = item[0]
+        self.cur_measurement << item[1]
+
+        self.draw_measurement(+self.cur_measurement)
         self.measure_box.setCurrentText(name)
         self.delete_measure_verify_window.hide()
 
