@@ -1,8 +1,13 @@
-class Pointer:
-    def __init__(self, v) -> None:
+from typing import Generic, TypeVar
+
+T = TypeVar('T')
+
+
+class Pointer(Generic[T]):
+    def __init__(self, v: T) -> None:
         self._val = v
     
-    def set(self, v):
+    def set(self, v: T):
         self._val = v
     
     def get(self):
