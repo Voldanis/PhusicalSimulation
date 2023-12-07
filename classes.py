@@ -33,11 +33,12 @@ class Point(Object):
     def top_left_corner(self, unit: int, offset: int, canvas: QPixmap,
                         measure: 'Measurement'):
         if measure.dimensions_num == 1:
-            return (self.x*unit - self.radius//2 - measure.cam_x*unit + offset,
+            return (round(self.x*unit - self.radius//2 - measure.cam_x*unit + offset),
                     canvas.height()//2 - self.radius//2)
         else:
-            return (self.x*unit - self.radius//2 - measure.cam_x*unit + offset,
-                    canvas.height() - self.y*unit - self.radius//2 + measure.cam_y*unit - offset)
+            return (round(self.x*unit - self.radius//2 - measure.cam_x*unit + offset),
+                    round(canvas.height() - self.y*unit - self.radius//2
+                          + measure.cam_y*unit - offset))
     
     def draw(self, painter: QPainter, unit: int, offset: int, canvas: QPixmap,
              measure: 'Measurement'):

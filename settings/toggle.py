@@ -7,6 +7,7 @@ class ToggleSettings(QWidget):
 
         self.measures_widget = measures_widget
         self.objects_widget = objects_widget
+        objects_widget.hide()
 
         self.init_ui()
 
@@ -31,6 +32,7 @@ class ToggleSettings(QWidget):
             self.measures_button.setChecked(True)
             return
         self.objects_button.setChecked(False)
+        self.objects_widget.hide()
         self.measures_widget.show()
     
     def objects_clicked(self):
@@ -39,3 +41,4 @@ class ToggleSettings(QWidget):
             return
         self.measures_button.setChecked(False)
         self.measures_widget.hide()
+        self.objects_widget.show()

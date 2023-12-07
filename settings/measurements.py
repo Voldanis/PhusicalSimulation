@@ -17,7 +17,7 @@ from utils import Pointer
 
 class MeasurementsSettings(QWidget):
     def __init__(self, measurements: dict[str, Measurement],
-                 cur_measurement: Pointer,
+                 cur_measurement: Pointer[Measurement],
                  draw_measurement: Callable[[Measurement], None]) -> None:
         super().__init__()
 
@@ -36,7 +36,7 @@ class MeasurementsSettings(QWidget):
         self.measure_box = QComboBox()
         self.measure_box.addItems(self.measurements.keys())
         self.measure_box.activated[str].connect(self.measure_box_changed)
-        layout.addWidget(self.measure_box)        
+        layout.addWidget(self.measure_box)
 
         self.create_measure = QWidget()
         create_measure = QGridLayout(self.create_measure)

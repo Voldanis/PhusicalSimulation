@@ -1,3 +1,4 @@
+import sys
 import time
 from math import ceil
 
@@ -12,7 +13,7 @@ from PyQt5.QtWidgets import (
 )
 
 from classes import Measurement
-from settings import MeasurementsSettings, ToggleSettings
+from settings import MeasurementsSettings, ObjectsSettings, ToggleSettings
 from utils import Pointer
 
 
@@ -51,10 +52,16 @@ class MainWindow(QWidget):
             self.measurements, self.cur_measurement,
             self.draw_measurement
         )
-        toggle_widget = ToggleSettings(measures_settings, None)
+        objects_settings = ObjectsSettings(
+            self,
+            self.cur_measurement,
+            self.draw_measurement
+        )
+        toggle_widget = ToggleSettings(measures_settings, objects_settings)
 
         settings.addWidget(toggle_widget)
         settings.addWidget(measures_settings)
+        settings.addWidget(objects_settings)
 
         self.draw_measurement(+self.cur_measurement)
 
@@ -147,6 +154,6 @@ class MainWindow(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication([])
+    app = QApplication(sys.argv)
     window = MainWindow()
     app.exec()
