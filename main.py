@@ -2,22 +2,20 @@ import time
 from math import ceil
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QColor, QFont, QPainter, QPen, QPixmap
+from PyQt5.QtGui import QColor, QFont, QKeyEvent, QPainter, QPen, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
-    QComboBox,
     QGridLayout,
     QLabel,
-    QLineEdit,
-    QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
-from classes import Measurement, Point
+from classes import Measurement
+from settings import MeasurementsSettings, ToggleSettings
 
 
-class Window(QWidget):
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -28,85 +26,47 @@ class Window(QWidget):
         self.values = 11
         self.fps = 10
 
-        self.cur_measurement.objects.append(Point(0, 0, 10, 0, 0, 0, 0, 0))
-
         self.init_ui()
     
     def init_ui(self):        
-        layout = QGridLayout()
+        layout = QGridLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.label = QLabel()
-        layout.addWidget(self.label, 0, 1)
+        self.canvas = QLabel()
+        layout.addWidget(self.canvas, 0, 1)
 
         self.timer = QtCore.QTimer()
         #self.start_timer()
 
-        settings = QWidget()
-        settings.setMaximumWidth(160)
+        settings_widget = QWidget()
+        settings_widget.setMaximumWidth(160)
+        layout.addWidget(settings_widget, 0, 0)
 
-        self.settings = QVBoxLayout(settings)
-        self.settings.setContentsMargins(8, 8, 8, 8)
-        self.settings.setAlignment(QtCore.Qt.AlignmentFlag.AlignAbsolute)
+        settings = QVBoxLayout(settings_widget)
+        settings.setContentsMargins(8, 8, 8, 8)
 
-        measure_box = QComboBox()
-        measure_box.addItems([*self.measurements.keys(), "Добавить среду..."])
-        measure_box.activated[str].connect(self.measure_box_changed)
-        measure_box.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-        self.settings.addWidget(measure_box)
-        
-        layout.addWidget(settings, 0, 0)
+        measures_settings = MeasurementsSettings(self.measurements, self.draw_measurement)
+        toggle_widget = ToggleSettings(measures_settings, None)
 
-        self.create_measure = QWidget()
-        create_measure = QGridLayout(self.create_measure)
-        create_measure.setContentsMargins(0, 0, 0, 0)
-
-        line_name = QLineEdit()
-        line_name.setPlaceholderText("Name")
-        line_d = QLineEdit()
-        line_d.setPlaceholderText("Dimensions")
-        button_create = QPushButton("Create")
-        button_cancel = QPushButton("Cancel")
-        button_cancel.clicked.connect(self.measurement_cancel)
-
-        create_measure.addWidget(line_name, 0, 0, 1, 2)
-        create_measure.addWidget(line_d, 1, 0, 1, 2)
-        create_measure.addWidget(button_create, 2, 0)
-        create_measure.addWidget(button_cancel, 2, 1)
-        create_measure.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
-
-        self.setLayout(layout)
+        settings.addWidget(toggle_widget)
+        settings.addWidget(measures_settings)
 
         self.draw_measurement(self.cur_measurement)
-        
-        self.show()
 
-    def measure_box_changed(self, text: str):
-        if text == "Добавить среду...":
-            self.settings.addWidget(self.create_measure)
-            self.create_measure.show()
-        else:
-            measurement = self.measurements.get(text)
-            if measurement is None:
-                return
-            self.cur_measurement = measurement
-            self.draw_measurement(measurement)
-        
-    def measurement_cancel(self):
-        self.settings.removeWidget(self.create_measure)
-        self.create_measure.hide()
+        self.setFocus()
+        self.show()
 
     def draw_measurement(self, measure: 'Measurement'):
         canvas = QPixmap(self.canvas_width, self.canvas_height)
 
-        canvas.fill(QColor('white'))
+        canvas.fill(QColor("white"))
         painter = QPainter(canvas)
         painter.setBrush(QtCore.Qt.GlobalColor.black)
         
         pen = QPen()
         pen.setWidth(1)
-        pen.setColor(QColor('black'))
+        pen.setColor(QColor("black"))
         painter.setPen(pen)
 
         font = QFont()
@@ -146,7 +106,7 @@ class Window(QWidget):
                 obj.draw(painter, unit, offset, canvas, measure)
         painter.end()
 
-        self.label.setPixmap(canvas)
+        self.canvas.setPixmap(canvas)
 
     def start_timer(self):
         self.timer.timeout.connect(self.iteration)
@@ -159,7 +119,7 @@ class Window(QWidget):
             i.simulate(t)
         self.draw_measurement(self.cur_measurement)
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QKeyEvent):
         if event.key() == QtCore.Qt.Key.Key_A:
             self.cur_measurement.cam_x -= 1
         elif event.key() == QtCore.Qt.Key.Key_D:
@@ -172,10 +132,12 @@ class Window(QWidget):
             self.cur_measurement.scale *= 1.1
         elif event.key() == QtCore.Qt.Key.Key_Minus:
             self.cur_measurement.scale /= 1.1
+        elif event.key() == QtCore.Qt.Key.Key_Escape:
+            self.setFocus()
         self.draw_measurement(self.cur_measurement)
 
 
 if __name__ == '__main__':
     app = QApplication([])
-    window = Window()
+    window = MainWindow()
     app.exec()
