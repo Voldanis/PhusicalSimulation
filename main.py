@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QApplication,
     QGridLayout,
     QLabel,
+    QPushButton,
     QVBoxLayout,
     QWidget,
 )
@@ -26,7 +27,7 @@ class MainWindow(QWidget):
         self.measurements = {"1D": Measurement(1, 0, 0), "2D": Measurement(2, 0, 0)}
         self.cur_measurement = Pointer(self.measurements["1D"])
         self.values = 11
-        self.fps = 10
+        self.fps = 60
 
         self.init_ui()
     
@@ -38,8 +39,9 @@ class MainWindow(QWidget):
         self.canvas = QLabel()
         layout.addWidget(self.canvas, 0, 1)
 
-        self.timer = QtCore.QTimer()
-        #self.start_timer()
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(1000//self.fps)
+        self.timer.timeout.connect(self.iteration)
 
         settings_widget = QWidget()
         settings_widget.setMaximumWidth(160)
@@ -48,6 +50,8 @@ class MainWindow(QWidget):
         settings = QVBoxLayout(settings_widget)
         settings.setContentsMargins(8, 8, 8, 8)
 
+        self.start_button = QPushButton("Пуск")
+        self.start_button.clicked.connect(self.start_clicked)
         measures_settings = MeasurementsSettings(
             self.measurements, self.cur_measurement,
             self.draw_measurement
@@ -59,6 +63,7 @@ class MainWindow(QWidget):
         )
         toggle_widget = ToggleSettings(measures_settings, objects_settings)
 
+        settings.addWidget(self.start_button)
         settings.addWidget(toggle_widget)
         settings.addWidget(measures_settings)
         settings.addWidget(objects_settings)
@@ -67,6 +72,14 @@ class MainWindow(QWidget):
 
         self.setFocus()
         self.show()
+    
+    def start_clicked(self):
+        if self.start_button.text() == "Пуск":
+            self.start_timer()
+            self.start_button.setText("Пауза")
+        else:
+            self.stop_timer()
+            self.start_button.setText("Пуск")
 
     def draw_measurement(self, measure: 'Measurement'):
         canvas = QPixmap(self.canvas_width, self.canvas_height)
@@ -120,14 +133,18 @@ class MainWindow(QWidget):
         self.canvas.setPixmap(canvas)
 
     def start_timer(self):
-        self.timer.timeout.connect(self.iteration)
         (+self.cur_measurement).time = time.time()
-        self.timer.start(int(1000 / self.fps))
+        self.timer.start()
+    
+    def stop_timer(self):
+        self.timer.stop()
 
     def iteration(self):
-        t = time.time() - (+self.cur_measurement).time
-        for i in (+self.cur_measurement).objects:
-            i.simulate(t)
+        dt = time.time() - (+self.cur_measurement).time
+        for obj in (+self.cur_measurement).objects:
+            obj.simulate(dt)
+        (+self.cur_measurement).time = time.time()
+
         self.draw_measurement(+self.cur_measurement)
 
     def keyPressEvent(self, event: QKeyEvent):

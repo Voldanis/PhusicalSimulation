@@ -24,9 +24,12 @@ class Point(Object):
         self.acceleration = Vector(ax, ay)
         self.last_sim = created_time
 
-    def simulate(self, t: float):
-        dt = t - self.last_sim
-        self.x += self.velocity.x * dt + self.acceleration * dt * dt / 2
+    def simulate(self, dt: float):
+        """
+        Args:
+            dt (float): time delta
+        """
+        self.x += self.velocity.x * dt + self.acceleration.x * dt * dt / 2
         self.y += self.velocity.y * dt + self.acceleration.y * dt * dt / 2
         self.velocity += self.acceleration * dt
     
