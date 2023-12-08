@@ -2,7 +2,7 @@ from typing import Callable
 
 from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 
-from classes import Measurement
+from physic_models import Measurement
 from utils import Pointer
 
 from .object_builders import Builder, PointBuilder

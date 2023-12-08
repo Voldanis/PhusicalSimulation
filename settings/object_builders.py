@@ -2,7 +2,7 @@ from time import time
 
 from PyQt5.QtWidgets import QLineEdit, QMessageBox, QVBoxLayout, QWidget
 
-from classes import Object, Point
+from physic_models import Object, Point
 
 
 class Builder:

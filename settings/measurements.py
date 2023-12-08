@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from classes import Measurement
+from physic_models import Measurement
 from utils import Pointer
 
 
