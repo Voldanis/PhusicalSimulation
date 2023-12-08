@@ -40,7 +40,7 @@ class MainWindow(QWidget):
         layout.addWidget(self.canvas, 0, 1)
 
         self.timer = QtCore.QTimer(self)
-        self.timer.setInterval(1000//self.fps)
+        self.timer.setInterval(1000 // self.fps)
         self.timer.timeout.connect(self.iteration)
 
         settings_widget = QWidget()

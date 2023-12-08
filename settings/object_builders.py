@@ -46,7 +46,7 @@ class PointBuilder(Builder):
     
     def is_valid(self, warning_parent: QWidget) -> bool:
         if any(
-            not widget.text().replace('.', '', 1).isdigit()
+            not widget.text().removeprefix('-').replace('.', '', 1).isdigit()
             for widget in (self.x, self.y, self.vx, self.vy, self.ax, self.ay)
         ):
             QMessageBox.warning(warning_parent, "Ошибка",
