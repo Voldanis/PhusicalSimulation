@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QWidget
 class Object:
     info_content: list[tuple[str, str] | str]
 
-    def simulate(self, t: float):
+    def simulate(self, t: float, g: 'Vector'):
         raise NotImplementedError
     
     def top_left_corner(self) -> (float, float):
@@ -50,14 +50,15 @@ class Point(Object):
             ("X", f"{self.x}"), ("Y", f"{self.y}")
         ]
 
-    def simulate(self, dt: float):
+    def simulate(self, dt: float, g: 'Vector'):
         """
         Args:
             dt (float): time delta
         """
-        self.x += self.velocity.x * dt + self.acceleration.x * dt * dt / 2
-        self.y += self.velocity.y * dt + self.acceleration.y * dt * dt / 2
-        self.velocity += self.acceleration * dt
+        acceleration = self.acceleration + g
+        self.x += self.velocity.x * dt + acceleration.x * dt * dt / 2
+        self.y += self.velocity.y * dt + acceleration.y * dt * dt / 2
+        self.velocity += acceleration * dt
     
     def center(self, unit: int, offset: int, canvas_h: int, measure: 'Measurement'):
         if measure.dimensions_num == 1:

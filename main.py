@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 )
 
 from canvas import Canvas
-from physic_models import Measurement
+from physic_models import Measurement, Vector
 from settings import MeasurementsSettings, ObjectsSettings, TimeSettings, ToggleSettings
 from utils import Pointer
 
@@ -51,6 +51,7 @@ class MainWindow(QWidget):
         measures_settings = MeasurementsSettings(
             self.measurements, self.cur_measurement, self.draw_measurement
         )
+        self.cur_g = measures_settings.get_var_g_pointer()
         objects_settings = ObjectsSettings(
             self, self.cur_measurement, self.draw_measurement
         )
@@ -76,7 +77,7 @@ class MainWindow(QWidget):
     def iteration(self):
         dt = time.time() - (+self.cur_measurement).time
         for obj in (+self.cur_measurement).objects:
-            obj.simulate(dt)
+            obj.simulate(dt, Vector(0, -+self.cur_g))
         (+self.cur_measurement).time = time.time()
 
         self.draw_measurement(+self.cur_measurement)

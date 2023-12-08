@@ -24,6 +24,7 @@ class MeasurementsSettings(QWidget):
         self.measurements = measurements
         self.cur_measurement = cur_measurement
         self.draw_measurement = draw_measurement
+        self.cur_g = Pointer(0.0)
 
         self.init_ui()
     
@@ -69,7 +70,6 @@ class MeasurementsSettings(QWidget):
         vars_layout = QGridLayout(self.vars_box)
         vars_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.cur_g = 0
         vars_layout.addWidget(QLabel("g"), 0, 0)
         self.var_g = QLineEdit()
         self.var_g.setPlaceholderText("Рац g. Через \".\"")
@@ -154,8 +154,11 @@ class MeasurementsSettings(QWidget):
         self.delete_measure_verify_window.hide()
     
     def var_g_changed(self):
-        if not self.var_g.text().replace('.', '', 1).isdigit():
+        if not self.var_g.text().removeprefix('-').replace('.', '', 1).isdigit():
             self.var_g.setText('')
             return
         
-        self.cur_g = float(self.var_g.text())
+        self.cur_g << float(self.var_g.text())
+    
+    def get_var_g_pointer(self) -> Pointer[float]:
+        return self.cur_g
